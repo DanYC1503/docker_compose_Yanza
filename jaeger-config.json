@@ -1,0 +1,21 @@
+{
+    "agent": {
+      "log_level": "debug",
+      "reporter_log_spans": true,
+      "local_agent": {
+        "reporting_host": "jaeger_metrics",
+        "reporting_port": 6831
+      }
+    },
+    "collector": {
+      "log_level": "info",
+      "collector_endpoint": "http://jaeger:14268/api/traces"
+    },
+    "reporter": {
+      "log_level": "info"
+    },
+    "logging": {
+      "level": "info"
+    }
+  }
+  

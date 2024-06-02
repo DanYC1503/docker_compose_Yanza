@@ -1,0 +1,154 @@
+openapi: 3.1.0
+info:
+  title: Cliente Services API
+  description: API para la gestión de clientes
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8081/docker_project/rs'
+
+components:
+  schemas:
+    NuevoCliente:
+      type: object
+      properties:
+        dni:
+          type: string
+        nombre:
+          type: string
+        direccion:
+          type: string
+      required:
+        - dni
+        - nombre
+
+    ClienteActualizar:
+      type: object
+      properties:
+        codigo:
+          type: number
+        dni:
+          type: string
+        nombre:
+          type: string
+        direccion:
+          type: string
+      required:
+        - codigo
+        - dni
+        - nombre
+paths:
+  /clientes:   
+    post:
+      summary: Crear un nuevo cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NuevoCliente'
+      responses:
+        '200':
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NuevoCliente'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+    put:
+      summary: Actualizar un cliente existente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteActualizar'
+      responses:
+        '200':
+          description: Cliente actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteActualizar'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /clientes/{id}:   # Adjusted key for the DELETE method
+    delete:
+      summary: Borrar un cliente por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cliente borrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  
+  /clientes/{dni}/{nombre}:   # Adjusted key for the second GET method
+    get:
+      summary: Leer un cliente por DNI y nombre en la ruta
+      parameters:
+        - name: dni
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: nombre
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /clientes/list:   # Adjusted key for the GET method
+    get:
+      summary: Obtener la lista de clientes
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cliente'
+        '404':
+          description: No se registran clientes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'

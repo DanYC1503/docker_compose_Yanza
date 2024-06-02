@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: dangyan03/practica_docker_compose:postgres-danYC
+    container_name: postgre_Container
+    restart: always
+    ports: 
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - docker_net
+
+  pgAdmin:
+    image: dangyan03/practica_docker_compose:pgadmin4-danYC
+    container_name: pdAdmin_Container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com 
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports: 
+      - "4000:80"
+    depends_on:
+      - postgres
+    networks:
+      - docker_net
+    
+  wildfly:
+    image: dangyan03/practica_docker_compose:wildfly-danYC
+    container_name: wildfly_Container
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - pgAdmin
+    networks:
+      - docker_net
+
+  docker_project:
+    image: dangyan03/practica_docker_compose:docker_project-danYC
+    container_name: docker_project_Container
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      JAEGER_AGENT_HOST: jaeger_metrics
+      JAEGER_AGENT_PORT: 6831
+    volumes:
+      - ./jaeger-config.json:/opt/jaeger-config.json
+    depends_on:
+      - wildfly
+      - pgAdmin
+      - postgres
+    networks:
+      - docker_net
+
+  angular:
+    image: dangyan03/practica_docker_compose:docker_angular-danYC
+    container_name: angular_Container
+    restart: always
+    ports:
+      - "4200:80"
+    depends_on:
+      - postgres
+      - pgAdmin
+      - wildfly
+    networks:
+      - docker_net
+
+  swaggerui:
+    image: dangyan03/practica_docker_compose:swaggerapi_swagger-ui-danYC
+    container_name: swaggerui_Container
+    restart: always
+    ports:
+      - "8888:8080"
+    environment:
+      SWAGGER_JSON: /swagger/swagger.yaml
+    volumes:
+      - ./swagger.yaml:/swagger/swagger.yaml
+    networks:
+      - docker_net
+
+  swaggereditor:
+    image: dangyan03/practica_docker_compose:swaggerapi_swagger-editor-danYC
+    container_name: swaggereditor_Container
+    restart: always
+    ports:
+      - "9999:8080"
+    environment:
+      SWAGGER_JSON: /swagger/swagger.yaml
+    volumes:
+      - ./swagger.yaml:/swagger/swagger.yaml
+    networks:
+      - docker_net
+
+  jaeger:
+    image: dangyan03/practica_docker_compose:jaegertracing_all-in-one-danYC
+    container_name: jaeger_metrics
+    restart: always
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+    depends_on:
+      - wildfly
+    networks:
+      - docker_net
+networks:
+  docker_net:
